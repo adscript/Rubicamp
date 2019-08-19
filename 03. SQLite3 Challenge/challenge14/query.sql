@@ -2,7 +2,8 @@ CREATE TABLE mahasiswa(
    nim    CHAR(8) PRIMARY KEY  NOT NULL,
    nama           VARCHAR(20)  NOT NULL,
    alamat         VARCHAR(50)  NOT NULL,
-   idJurusan      INTEGER  references jurusan(idJurusan)
+   idJurusan      INTEGER,
+   FOREIGN KEY(idJurusan) references jurusan(idJurusan)
 );
 
 CREATE TABLE jurusan(
@@ -24,9 +25,12 @@ CREATE TABLE matakuliah(
 CREATE TABLE nilai(
    id INTEGER PRIMARY KEY AUTOINCREMENT,
    nilai      VARCHAR(10), 
-   idMatkul   INTEGER references matakuliah(idMatkul),
-   nim        CHAR(8) references mahasiswa(nim),
-   idDosen    INTEGER references dosen(idDosen)
+   idMatkul   INTEGER,
+   FOREIGN KEY(idMatkul) references matakuliah(idMatkul),
+   nim        CHAR(8),
+   FOREIGN KEY(nim) references mahasiswa(nim),
+   idDosen    INTEGER,
+   FOREIGN KEY(idDosen) references dosen(idDosen)
 );
 
 INSERT INTO mahasiswa(nim,nama,alamat,idJurusan)
