@@ -37,10 +37,10 @@ INSERT INTO mahasiswa(nim,nama,alamat,idJurusan)
 VALUES ( '10115110', 'Adnan Radja Maulana', 'Ujungberung', 1 );
 
 INSERT INTO mahasiswa(nim,nama,alamat,idJurusan)
-VALUES ( '101151032', 'Romario', 'Bandung', 1 );
+VALUES ( '101151032', 'Romario', 'Bandung', 2 );
 
 INSERT INTO mahasiswa(nim,nama,alamat,idJurusan)
-VALUES ( '101151054', 'Rendy', 'Bandung', 1 );
+VALUES ( '101151054', 'Rendy', 'Bandung', 3 );
 
 INSERT INTO jurusan(nama_jurusan)
 VALUES ('MATEMATIKA');
@@ -49,13 +49,12 @@ VALUES ('MESIN');
 INSERT INTO jurusan(nama_jurusan)
 VALUES ('MINYAK');
 
-INSERT INTO dosen(nama_dosen)
+INSERT INTO dosen(NIP, nama_dosen)
 VALUES ('132049212301','Warsoma');
-INSERT INTO dosen(nama_dosen)
+INSERT INTO dosen(NIP, nama_dosen)
 VALUES ('132049212302','Denny');
-INSERT INTO dosen(nama_dosen)
+INSERT INTO dosen(NIP, nama_dosen)
 VALUES ('132049212303','Aditya');
-
 
 INSERT INTO matakuliah(nama_mk,sks)
 VALUES ('ANALISIS DATA', '4');
@@ -64,9 +63,21 @@ VALUES ('TERMODINAMIKA', '4');
 INSERT INTO matakuliah(nama_mk,sks)
 VALUES ('AGAMA', '4');
 
-INSERT INTO kontrak(nilai, idMatkul, nim, idDosen)
-VALUES ('B', 1, '10115110', '132049212301');
-INSERT INTO kontrak(nilai, idMatkul, nim, idDosen)
-VALUES ('90', 1, '10115110', '132049212301');
-INSERT INTO kontrak(nilai, idMatkul, nim, idDosen)
-VALUES ('90', 1, '10115110', '132049212301');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('A', 1, '10115110', '132049212301');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('B', 1, '10115032', '132049212301');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('E', 1, '10115054', '132049212301');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('E', 2, '10115110', '132049212302');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('E', 2, '10115032', '132049212302');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('E', 2, '10115054', '132049212302');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('C', 3, '10115110', '132049212303');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('B', 3, '10115032', '132049212303');
+INSERT INTO kontrak(nilai, idMatkul, nim, NIP)
+VALUES ('E', 3, '10115054', '132049212303');
