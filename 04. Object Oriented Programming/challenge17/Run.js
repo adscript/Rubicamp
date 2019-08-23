@@ -1,4 +1,4 @@
-const MesinHitung = require(`./MesinHitung`);
+import MesinHitung from './MesinHitung';
 const Pi = 22/7;
 let mh = new MesinHitung();
 mh.add(10).subtract(5).result(); //1 + 10 - 5 = 6

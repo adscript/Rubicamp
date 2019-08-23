@@ -1,4 +1,4 @@
-module.exports = class MesinHitung{
+class MesinHitung{
     constructor(){
         this.x = 1;
     }
@@ -34,4 +34,6 @@ module.exports = class MesinHitung{
         console.log(this.x);
     }
 }
+
+export default MesinHitung;
 
