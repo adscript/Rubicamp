@@ -20,13 +20,13 @@ app.set('view engine', 'ejs')
             db.all(sql, (err, rows) => {
                 if (err) throw err;
                     rows.forEach( (item) => {
-                        data.push({string : `${item.string}` , integer: `${item.integer}`, float: `${item.float}`, date: `${item.date}`, bool: `${item.bool}`});
+                        data.push({id: `${item.id}` ,string : `${item.string}` , integer: `${item.integer}`, float: `${item.float}`, date: `${item.date}`, bool: `${item.bool}`});
                     }); 
                     res.render('list', {data})    
             });
         });
     });
-    
+
     app.get('/add', (req,res) => res.render('add'))
 
 
@@ -40,41 +40,40 @@ app.set('view engine', 'ejs')
                         db.run(sql, ins , (err) => {
                             if(err) throw err;
                         });
-
                         res.redirect('/');
                     })
     
     app.post('/edit/:id', (req,res) => {
         const id = req.params.id;
-        const edited = {string: req.body.string, integer: req.body.integer, float: req.body.float, date: req.body.date, boolean: req.body.bool};
-        data.splice(id,1,edited);
-        datajson = JSON.stringify(data);
-        fs.writeFile("data.json",datajson,(err)=>{
-            if(err)
-              throw err;
-              res.redirect('/');
-          });
-    })
-    
+        let ins = [req.body.string, req.body.integer, req.body.float, req.body.date, req.body.bool, id];
+        let sql = `UPDATE databaru SET string = ? , integer = ? , float = ?, date = ?, bool = ? WHERE id = ? `;
+        db.run(sql, ins , (err) => {
+            if(err) throw err;
+        });
+        res.redirect('/');
+    })    
     
     app.get('/delete/:id', (req,res) => {
-        let id = req.params.id;
-        data.splice(id,1);
-        datajson = JSON.stringify(data);
-        fs.writeFile("data.json",datajson,(err)=>{
-            if(err)
-              throw err;
-              res.redirect('/');
-          });
+        const id = req.params.id;
+        let sql = `DELETE FROM databaru WHERE id = ?`
+        db.get(sql, [id] , (err, row) => {
+            if (err) throw err;
+            res.redirect('/');
+        });
     })
     
     app.get('/edit/:id', (req,res) => {
         const id = req.params.id;
-        console.log(data[id], id);
-        res.render('edit', {item: data[id], id});
-    })
+        let sql = `SELECT * FROM databaru WHERE id = ?`;
+        let data = [];
+            db.get(sql, [id] , (err, row) => {
+                if (err) throw err;
+                data.push({id : `${row.id}`, string : `${row.string}` , integer: `${row.integer}`, float: `${row.float}`, date: `${row.date}`, bool: `${row.bool}`});
+                res.render('edit', {item: {...data[0]}}); 
+            });
+    });
     
 
-    app.listen(3000, () => {
-        console.log(`Example app listening on port ${3000}!`)
+    app.listen(8080, () => {
+        console.log(`Example app listening on port 8080!`)
     })
