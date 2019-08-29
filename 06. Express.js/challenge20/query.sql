@@ -6,3 +6,6 @@ CREATE TABLE databaru(
    date       TEXT       NOT NULL,
    bool       VARCHAR(5) NOT NULL
 );
+
+INSERT INTO databaru(string, integer, float, date, bool)
+VALUES ('Adnano', 27, 10.5, '15/04/1997', 'true');

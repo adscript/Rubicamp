@@ -9,14 +9,11 @@ let db = new sqlite3.Database(dbFile, sqlite3.OPEN_READWRITE, (err) => {
 const app = express();
 
 app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'ejs')
-
-
-    app.get('/', (req,res) => {
-        let sql = "SELECT * FROM databaru";
+app.set('view engine', 'ejs')  
+    app.get('/:page', (req,res) => {
+        let sql = "SELECT * FROM databaru ORDER BY id ASC LIMIT 3 OFFSET 0";
         let data = [];
         db.serialize( () => {
-
             db.all(sql, (err, rows) => {
                 if (err) throw err;
                     rows.forEach( (item) => {
@@ -27,12 +24,42 @@ app.set('view engine', 'ejs')
         });
     });
 
+    app.get('/', (req,res) => {
+        let sql = "SELECT * FROM databaru ORDER BY id ASC LIMIT 3 OFFSET 2";
+        let kondisi = [`id = ${req.query.valueID}`, `instr(string, "${req.query.valueString}") > 0`, `integer = ${req.query.valueInt}`, `float = ${req.query.valueFloat}`, `bool = "${req.query.valueBool}"`];
+        let status = ['isID','isString','isInt','isFloat','isBool'];
+        let i = 0; firstKon = true; 
+        for(const key in req.query){
+            if(key == status[i]){
+                if(req.query[key].length > 1){
+                    if (firstKon){
+                        sql += ` WHERE ${kondisi[i]}`;
+                        firstKon = false;
+                    }
+                    else
+                        sql += ` AND ${kondisi[i]}`;
+                }
+                i++;
+            }
+        }
+        let data = [];
+        db.serialize( () => {
+            db.all(sql, (err, rows) => {
+                if (err) throw err;
+                    rows.forEach( (item) => {
+                        data.push({id: `${item.id}` ,string : `${item.string}` , integer: `${item.integer}`, float: `${item.float}`, date: `${item.date}`, bool: `${item.bool}`});
+                    }); 
+                    res.render('list', {data})    
+            });
+        });
+    });
+
+
     app.get('/add', (req,res) => res.render('add'))
 
 
     app.use(bodyParser.urlencoded({ extended: false}))
     app.use(bodyParser.json())
-    app.get('/', (req,res) => res.render('list', {data}))
 
     app.post('/add', (req,res) => {
         let ins = [req.body.string, req.body.integer, req.body.float, req.body.date, req.body.bool];
@@ -72,7 +99,6 @@ app.set('view engine', 'ejs')
                 res.render('edit', {item: {...data[0]}}); 
             });
     });
-    
 
     app.listen(8080, () => {
         console.log(`Example app listening on port 8080!`)
