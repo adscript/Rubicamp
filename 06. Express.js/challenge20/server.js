@@ -25,8 +25,14 @@ app.set('view engine', 'ejs')
     });
 
     app.get('/', (req,res) => {
-        let sql = "SELECT * FROM databaru ORDER BY id ASC LIMIT 3 OFFSET 2";
-        let kondisi = [`id = ${req.query.valueID}`, `instr(string, "${req.query.valueString}") > 0`, `integer = ${req.query.valueInt}`, `float = ${req.query.valueFloat}`, `bool = "${req.query.valueBool}"`];
+        
+        let sql = "SELECT * FROM databaru ";
+        let kondisi = [`id ${req.query.valueID != "" ? ` = ${req.query.valueID}` : ` != NULL` }`, 
+        `instr(string, "${req.query.valueString}") > 0`, 
+        `integer ${req.query.valueInt != "" ? ` = ${req.query.valueInt}` : ` != NULL`}`, 
+        `float ${req.query.valueFloat != "" ? ` = ${req.query.valueFloat}` : ` != NULL`}`, 
+        `bool ${req.query.valueBool != "" ? ` = "${req.query.valueBool}"` : ` != NULL`}`];
+        
         let status = ['isID','isString','isInt','isFloat','isBool'];
         let i = 0; firstKon = true; 
         for(const key in req.query){
@@ -42,6 +48,15 @@ app.set('view engine', 'ejs')
                 i++;
             }
         }
+        if(req.query.isDate.length > 1 && req.query.start <= req.query.end){
+            if(firstKon)
+                sql += ` WHERE`;
+            else
+                sql += ` AND`;
+            sql += ` date BETWEEN "${req.query.start}" AND "${req.query.end}"`
+        }
+        
+        sql = sql + " ORDER BY id ASC LIMIT 3 OFFSET 0";
         let data = [];
         db.serialize( () => {
             db.all(sql, (err, rows) => {
