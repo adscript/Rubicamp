@@ -8,110 +8,74 @@ let db = new sqlite3.Database(dbFile, sqlite3.OPEN_READWRITE, (err) => {
 });
 const app = express();
 
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'ejs')
-app.get('/:page', (req, res) => {
-    let sql = "SELECT * FROM databaru ORDER BY id ASC LIMIT 3 OFFSET 0";
-    let data = [];
-    db.serialize(() => {
-        db.all(sql, (err, rows) => {
-            if (err) throw err;
-            rows.forEach((item) => {
-                data.push({ id: `${item.id}`, string: `${item.string}`, integer: `${item.integer}`, float: `${item.float}`, date: `${item.date}`, bool: `${item.bool}` });
-            });
-            res.render('list', { data })
-        });
-    });
-});
-
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 app.get('/', (req, res) => {
 
     //FILTER
 
-    let arrKondisi = [req.query.valueID, req.query.valueString, parseInt(req.query.valueInt), parseFloat(req.query.valueFloat), req.query.valueBool];
+    let arrKondisi = [parseInt(req.query.valueID), req.query.valueString, parseInt(req.query.valueInt), parseFloat(req.query.valueFloat), req.query.valueBool];
     let arrIsChecked = [req.query.isID, req.query.isString, req.query.isInt, req.query.isFloat, req.query.isBool];
-    let arrField = ["id","string","integer","float","bool","date"];
+    let arrField = ["id = ?","instr(string,?)","integer = ?","float = ?","bool = ?","date"];
 
     let activeFilter = [];
     let activeIndex = [];
     for(const key in arrKondisi){
         if (arrIsChecked[key] && arrKondisi[key]){
             activeFilter.push(arrKondisi[key]);
-            activeIndex.push(key);
+            activeIndex.push(Number(key));
         }
     }
 
     if(req.query.isDate && req.query.start){
+        activeFilter.push(`${req.query.start}`);
         if(req.query.end)
-            dateFilter = 2;
-        else 
-            dateFilter = 1;
-        activeIndex.push('5');
-    } else
-        dateFilter = 0;
-
-    console.log("new " );
-    console.log(activeFilter);
-    console.log(dateFilter);
-
-
-    const currPage = Number(req.query.page) || 1;
-    const limitpage = 3;
-    const lastquery = req.query;
-
-    db.all(sql,activeFilter,(err, count) => {
-        
-    })
-
-
+            activeFilter.push(`${req.query.end}`);
+        activeIndex.push(5);
+    }
     
-    let kondisi = [`id ${req.query.valueID != "" ? ` = ${req.query.valueID}` : ` != NULL`}`,
-    `instr(string, "${req.query.valueString}") > 0`,
-    `integer ${req.query.valueInt != "" ? ` = ${req.query.valueInt}` : ` != NULL`}`,
-    `float ${req.query.valueFloat != "" ? ` = ${req.query.valueFloat}` : ` != NULL`}`,
-    `bool ${req.query.valueBool != "" ? ` = "${req.query.valueBool}"` : ` != NULL`}`];
-
-    let status = ['isID', 'isString', 'isInt', 'isFloat', 'isBool'];
-    let i = 0; firstKon = true;
-    for (const key in req.query) {
-        if (key == status[i]) {
-            if (req.query[key].length > 1) {
-                if (firstKon) {
-                    sql += ` WHERE ${kondisi[i]}`;
-                    firstKon = false;
-                }
+    //COUNT DATA WITH FILTER
+    let sql = "SELECT count(*) FROM databaru";
+    let filter = false;
+    if(activeFilter.length > 0){
+        sql += " WHERE";
+        filter = true;
+        for(let i = 0; i < activeIndex.length; i++){
+            if (activeIndex[i] != 5){
+                sql += ` ${arrField[activeIndex[i]]}`;
+            } else {
+                if(req.query.end)
+                    sql += ` ${arrField[activeIndex[i]]} BETWEEN ? AND ?`;
                 else
-                    sql += ` AND ${kondisi[i]}`;
+                    sql += ` ${arrField[activeIndex[i]]} >= ?`;
             }
-            i++;
-        }
-    }
-
-    if (req.query.isDate != undefined) {
-        if (req.query.start <= req.query.end && req.query.isDate.length > 1) {
-            if (firstKon)
-                sql += ` WHERE`;
-            else
+            if(i < activeIndex.length - 1)
                 sql += ` AND`;
-            if (req.query.end)
-                sql += ` date BETWEEN "${req.query.start}" AND "${req.query.end}"`;
-            else
-                sql += ` date BETWEEN "${req.query.start}" AND "${req.query.start}"`;
         }
     }
 
-    sql = sql + ` ORDER BY id ASC LIMIT 3 OFFSET 0`;
-    console.log(sql);
+    const currpage = Number(req.query.page) || 1;
+    const limit = 3;
+    const lastquery = req.query;
+    db.all(sql, activeFilter, (err, count) => {
+        const allpage = count[0]['count(*)'];
+        const pages = Math.ceil( allpage / limit);
+        const offset = (currpage - 1) * limit;
 
-    let data = [];
-    db.serialize(() => {
-        db.all(sql, (err, rows) => {
-            if (err) throw err;
-            rows.forEach((item) => {
-                data.push({ id: `${item.id}`, string: `${item.string}`, integer: `${item.integer}`, float: `${item.float}`, date: `${item.date}`, bool: `${item.bool}` });
-            });
-            res.render('list', { data })
+        sql = sql.replace("count(*)","*");
+        sql += ` LIMIT ${limit} OFFSET ${offset}`;
+
+        db.all(sql, activeFilter, (err,rows)=>{
+            if(err) return err;
+            res.render('list',{
+                data: rows,
+                query: lastquery,
+                current: currpage,
+                pages: pages,
+                url : req.url
+            })
         });
+    
     });
 });
 
