@@ -81,5 +81,17 @@ module.exports = (db) => {
     })
   })
 
+  router.get('/edit/:id', (req, res) => {
+    const id = req.params.id;
+    db.collection("databaru")
+    .find({_id : ObjectId(id)})
+    .toArray()
+    .then(result => {
+      console.log(result[0].date);
+      
+      res.render('edit', { item : result[0], moment});
+    })
+  })
+
   return router;
 }
