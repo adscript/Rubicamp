@@ -61,7 +61,7 @@ module.exports = (db) => {
   router.get('/add', (req, res) => res.render('add'));
 
   router.post('/add',(req,res) => {
-    let insertValue = {"string": req.body.string, "integer": parseInt(req.body.integer), "float": parseFloat(req.body.float), "date": new Date(`${req.query.date}T00:00:00.000Z`), "bool": req.body.bool == 'true' ? true : false}
+    let insertValue = {"string": req.body.string, "integer": parseInt(req.body.integer), "float": parseFloat(req.body.float), "date": new Date(`${req.body.date}T00:00:00.000Z`), "bool": req.body.bool == 'true' ? true : false}
     console.log(insertValue);
     
     db.collection("databaru")
@@ -87,9 +87,19 @@ module.exports = (db) => {
     .find({_id : ObjectId(id)})
     .toArray()
     .then(result => {
-      console.log(result[0].date);
-      
       res.render('edit', { item : result[0], moment});
+    })
+  })
+
+  router.post('/edit/:id', (req,res) => {
+    const id = ObjectId(req.params.id);
+    const condition = { "string": req.body.string, "integer": parseInt(req.body.integer), "float": parseFloat(req.body.float), "date": new Date(`${req.body.date}T00:00:00.000Z`), "bool": req.body.bool == 'true' ? true : false}
+    console.log(condition);
+    
+    db.collection("databaru")
+    .updateOne({_id : id}, {$set: condition})
+    .then(result => {
+      res.redirect('/');
     })
   })
 
