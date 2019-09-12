@@ -116,8 +116,10 @@ router.get('/edit/:id', (req, res) => {
   const id = req.params.id;
   let sql = `SELECT * FROM databaru WHERE id = $1`;
   let data = [];
-  pool.query(sql, [id], (err, row) => {
+  pool.query(sql, [id], (err, result) => {
       if (err) throw err;
+      console.log(result.rows[0].id);
+      row = result.rows[0];
       data.push({ id: `${row.id}`, string: `${row.string}`, integer: `${row.integer}`, float: `${row.float}`, date: `${row.date}`, bool: `${row.bool}` });
       res.render('edit', { item: { ...data[0] } });
   });
